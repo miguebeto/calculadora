@@ -1,125 +1,29 @@
-import React, {useRef, useState} from 'react';
+import React from 'react';
 import {View, Text} from 'react-native';
 import {styles} from '../theme/appTheme';
 import {BotonCalc} from '../components/BotonCalc';
-
-enum Operadores {
-  sumar, restar, multiplicar, dividir
-}
+import {useCalculadora} from '../hooks/useCalculadora';
 
 export const CalculadoraScreen = () => {
-  const [numero, setNumero] = useState('0');
-  const [numeroAnterior, setNumeroAnterior] = useState('0');
-
-  const ultimaOperacion = useRef<Operadores>()
-
-  const limpiar = () => {
-    setNumero('0');
-    setNumeroAnterior('0');
-  };
-
-  const armarNumero = (numeroTexto: string) => {
-    //no aceptar doble punto
-    if (numero.includes('.') && numeroTexto === '.') return;
-
-    if (numero.startsWith('0') || numero.startsWith('-0')) {
-      // punto decimal
-      if (numeroTexto === '.') {
-        setNumero(numero + numeroTexto);
-
-        //evaluar si es otro cero y hay un punto
-      } else if (numeroTexto === '0' && numero.includes('.')) {
-        setNumero(numero + numeroTexto);
-
-        //evaluar si es diferente de cero y no tiene un punto
-      } else if (numeroTexto !== '0' && !numero.includes('.')) {
-        setNumero(numeroTexto);
-
-        //evitar el 0000.0
-      } else if (numeroTexto === '0' && !numero.includes('.')) {
-        setNumero(numero);
-      } else {
-        setNumero(numero + numeroTexto);
-      }
-
-    }else {
-      setNumero(numero + numeroTexto);
-    }
-  };
-
-  const positivoNegativo = () => {
-    if (numero.includes('-')) {
-      setNumero(numero.replace('-', ''));
-    } else {
-      setNumero('-' + numero);
-    }
-  };
-
-
-  const btnDel = () => {
-    if (numero.trim().length === 1) {
-      setNumero('0')
-    }else if(numero.includes('-') && numero.trim().length === 2){
-      setNumero('0')
-    }else {
-      setNumero(numero.slice(0,-1))
-    }
-  }
-
-
-  const cambiarNumPorAnterior = () => {
-    if(numero.endsWith('.')){
-      setNumeroAnterior(numero.slice(0,-1))
-    }else{
-      setNumeroAnterior(numero)
-    }
-    setNumero('0')
-  }
-
-  const btnDividir = () => {
-    cambiarNumPorAnterior();
-    ultimaOperacion.current = Operadores.dividir;
-  }
-  const btnMultiplicar = () => {
-    cambiarNumPorAnterior();
-    ultimaOperacion.current = Operadores.multiplicar;
-  }
-  const btnRestar = () => {
-    cambiarNumPorAnterior();
-    ultimaOperacion.current = Operadores.restar;
-  }
-  const btnSumar = () => {
-    cambiarNumPorAnterior();
-    ultimaOperacion.current = Operadores.sumar;
-  }
-
-  const calcular = () => {
-
-    const num1 = Number(numero);
-    const num2 = Number(numeroAnterior);
-
-    switch (ultimaOperacion.current) {
-      case Operadores.sumar:
-        setNumero(`${num1 + num2}`);
-        break
-      case Operadores.restar:
-        setNumero(`${num2 - num1}`);
-        break
-      case Operadores.multiplicar:
-        setNumero(`${num1 * num2}`);
-        break
-      case Operadores.dividir:
-        setNumero(`${num2 / num1}`);
-        break
-      }
-      setNumeroAnterior('0');
-  }
+  const {
+    numeroAnterior,
+    numero,
+    limpiar,
+    positivoNegativo,
+    btnDel,
+    btnDividir,
+    btnMultiplicar,
+    btnRestar,
+    btnSumar,
+    armarNumero,
+    calcular,
+  } = useCalculadora();
 
   return (
     <View style={styles.calculadoraContainer}>
-      {
-        (numeroAnterior !== '0') && <Text style={styles.resultadoPequeno}>{numeroAnterior}</Text>
-      }
+      {numeroAnterior !== '0' && (
+        <Text style={styles.resultadoPequeno}>{numeroAnterior}</Text>
+      )}
       <Text style={styles.calculadora} numberOfLines={1} adjustsFontSizeToFit>
         {numero}
       </Text>
